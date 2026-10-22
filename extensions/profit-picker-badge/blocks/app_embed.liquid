@@ -1,0 +1,83 @@
+{%- comment -%} Profit Picker — destaque colado na variante (mesma cor, uma peça só) {%- endcomment -%}
+{%- if template.name == 'product' -%}
+  {%- assign pp_id = product.metafields.profit_picker.variant_id | default: "" | remove: "gid://shopify/ProductVariant/" -%}
+  {%- if pp_id != blank and block.settings.enable_badge -%}
+    {%- assign pp_variant = nil -%}
+    {%- for v in product.variants -%}
+      {%- assign vidstr = v.id | append: "" -%}
+      {%- if vidstr == pp_id -%}{%- assign pp_variant = v -%}{%- endif -%}
+    {%- endfor -%}
+    {%- if pp_variant -%}
+      {%- assign pp_bg = product.metafields.profit_picker.badge_color | default: "#1a4d2e" -%}
+      {%- assign pp_fg = product.metafields.profit_picker.badge_text_color | default: "#ffffff" -%}
+      {%- assign pp_text = product.metafields.profit_picker.badge_text | default: "MELHOR ESCOLHA" -%}
+      <style>
+        .pp-mark{position:relative !important;overflow:visible !important;box-shadow:0 0 0 2px {{ pp_bg }} !important;z-index:2 !important}
+        .pp-mark .variant-option__button-label__pill{display:none !important}
+        .pp-host{overflow:visible !important;margin-bottom:28px !important}
+        .pp-badge{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:{{ pp_bg }};color:{{ pp_fg }};font-family:inherit;font-size:9px;font-weight:800;line-height:1.05;text-transform:uppercase;letter-spacing:.03em;text-align:center;padding:3px 7px;border-radius:0 0 7px 7px;white-space:nowrap;pointer-events:none;z-index:1}
+        .pp-badge span{display:block}
+      </style>
+      <script>
+        (function(){
+          var VID = "{{ pp_id }}";
+          var OPTS = [
+            {%- for opt_name in product.options -%}
+              {name: {{ opt_name | json }}, value: {{ pp_variant.options[forloop.index0] | json }}}{%- unless forloop.last -%},{%- endunless -%}
+            {%- endfor -%}
+          ];
+          var TEXT = {{ pp_text | json }};
+          function labelFor(inp){
+            if(inp.closest('label')) return inp.closest('label');
+            if(inp.id){ var id=(window.CSS&&CSS.escape)?CSS.escape(inp.id):inp.id; var l=document.querySelector('label[for="'+id+'"]'); if(l) return l; }
+            return inp.closest('[class*="swatch"]') || inp.parentElement;
+          }
+          function mark(el){
+            if(!el || el.classList.contains('pp-mark')) return;
+            el.classList.add('pp-mark');
+            var host = el.closest('fieldset') || el.parentElement;
+            if(host) host.classList.add('pp-host');
+            var b=document.createElement('span');
+            b.className='pp-badge';
+            b.innerHTML = TEXT.trim().split(/\s+/).map(function(w){return '<span>'+w+'</span>';}).join('');
+            el.appendChild(b);
+          }
+          function run(){
+            document.querySelectorAll('.pp-badge').forEach(function(e){e.remove();});
+            document.querySelectorAll('.pp-mark').forEach(function(e){e.classList.remove('pp-mark');});
+            document.querySelectorAll('.pp-host').forEach(function(e){e.classList.remove('pp-host');});
+            var hit = document.querySelectorAll('[data-variant-id="'+VID+'"]');
+            if(hit.length){ hit.forEach(function(el){ mark(el.closest('label')||el.closest('[class*="swatch"]')||el); }); return; }
+            OPTS.forEach(function(o){
+              document.querySelectorAll('input[type="radio"]').forEach(function(inp){
+                if((inp.name||'').toLowerCase().indexOf(String(o.name).toLowerCase())!==-1 && inp.value===String(o.value)) mark(labelFor(inp));
+              });
+            });
+          }
+          function boot(){
+            run();
+            var t; new MutationObserver(function(){clearTimeout(t);t=setTimeout(run,200);}).observe(document.body,{childList:true,subtree:true});
+            document.addEventListener('change',function(){setTimeout(run,150);});
+          }
+          if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+        })();
+      </script>
+    {%- endif -%}
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Profit Picker",
+  "target": "head",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_badge",
+      "label": "Enable Profit Picker badge",
+      "default": true,
+      "info": "Shows the highlighted variant badge on product pages. Configure which variant to highlight inside the Profit Picker app."
+    }
+  ]
+}
+{% endschema %}

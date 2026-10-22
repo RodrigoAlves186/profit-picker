@@ -1,0 +1,103 @@
+{
+  "app": {
+    "name": "Profit Picker",
+    "subtitle": "Highlight your best-selling variant on every product page",
+    "nav": {
+      "products": "Products",
+      "plans": "Plans"
+    }
+  },
+  "index": {
+    "managePlan": "Manage plan",
+    "currentPlan": "Current plan: {plan}",
+    "productsMarked": "{used} of {limit} products marked",
+    "productsMarkedUnlimited": "{used} of unlimited products marked",
+    "limitReached": "Limit reached",
+    "available": "Available",
+    "limitBannerTitle": "You've reached your plan limit",
+    "limitBannerText": "Upgrade to mark more products.",
+    "upgradeNow": "Upgrade now",
+    "noProductsHeading": "No products in this store yet",
+    "noProductsText": "Add products to your store to start marking variants.",
+    "variantSingular": "variant",
+    "variantPlural": "variants",
+    "marked": "Marked",
+    "notMarked": "Not marked",
+    "activateTitle": "Activate Profit Picker in your theme",
+    "activateText": "Open the theme editor and turn on the Profit Picker app embed. You only need to do this once per theme.",
+    "activateButton": "Activate in theme"
+  },
+  "product": {
+    "back": "Products",
+    "planLimitTitle": "Plan limit reached",
+    "planLimitText": "You already marked {used} products on the {plan} plan. Upgrade to mark more.",
+    "upgradePlan": "Upgrade plan",
+    "savedTitle": "Saved",
+    "savedText": "The badge is live on your storefront.",
+    "pickVariant": "Pick the variant to highlight",
+    "badgeStyle": "Badge style",
+    "badgeText": "Badge text",
+    "badgeBgColor": "Badge background color",
+    "badgeTextColor": "Badge text color",
+    "preview": "PREVIEW",
+    "variantPreviewLabel": "Variant",
+    "defaultBadgeText": "BEST CHOICE",
+    "customColor": "Pick a custom color",
+    "removeMarking": "Remove marking",
+    "save": "Save"
+  },
+  "billing": {
+    "title": "Plans",
+    "subtitle": "Choose the plan that fits your store",
+    "back": "Back",
+    "current": "Current",
+    "currentPlan": "Current plan",
+    "downgradeViaCancel": "Downgrade via cancel",
+    "cancelSubscription": "Cancel subscription",
+    "choose": "Choose {plan}",
+    "needMoreTitle": "Need more than 200 products regularly?",
+    "needMoreText": "The Pro plan is unlimited. For custom enterprise needs, reach out at support@profitpicker.app",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "price": "$0",
+        "limit": "5 products",
+        "features": [
+          "Up to 5 marked products",
+          "All badge customizations",
+          "Works on any OS 2.0 theme"
+        ]
+      },
+      "starter": {
+        "name": "Starter",
+        "price": "$1/month",
+        "limit": "50 products",
+        "features": [
+          "Up to 50 marked products",
+          "All badge customizations",
+          "Priority email support"
+        ]
+      },
+      "growth": {
+        "name": "Growth",
+        "price": "$5/month",
+        "limit": "200 products",
+        "features": [
+          "Up to 200 marked products",
+          "All badge customizations",
+          "Priority email support"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "$10/month",
+        "limit": "Unlimited",
+        "features": [
+          "Unlimited marked products",
+          "All badge customizations",
+          "Priority email support"
+        ]
+      }
+    }
+  }
+}

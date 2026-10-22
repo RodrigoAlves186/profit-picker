@@ -1,0 +1,103 @@
+{
+  "app": {
+    "name": "Profit Picker",
+    "subtitle": "Destaque a variante mais vendida em cada página de produto",
+    "nav": {
+      "products": "Produtos",
+      "plans": "Planos"
+    }
+  },
+  "index": {
+    "managePlan": "Gerenciar plano",
+    "currentPlan": "Plano atual: {plan}",
+    "productsMarked": "{used} de {limit} produtos marcados",
+    "productsMarkedUnlimited": "{used} de ilimitados produtos marcados",
+    "limitReached": "Limite atingido",
+    "available": "Disponível",
+    "limitBannerTitle": "Você atingiu o limite do seu plano",
+    "limitBannerText": "Faça upgrade para marcar mais produtos.",
+    "upgradeNow": "Fazer upgrade",
+    "noProductsHeading": "Ainda não há produtos nesta loja",
+    "noProductsText": "Adicione produtos à sua loja para começar a marcar variantes.",
+    "variantSingular": "variante",
+    "variantPlural": "variantes",
+    "marked": "Marcado",
+    "notMarked": "Não marcado",
+    "activateTitle": "Ative o Profit Picker no seu tema",
+    "activateText": "Abra o editor de tema e ative o app embed do Profit Picker. Você só precisa fazer isso uma vez por tema.",
+    "activateButton": "Ativar no tema"
+  },
+  "product": {
+    "back": "Produtos",
+    "planLimitTitle": "Limite do plano atingido",
+    "planLimitText": "Você já marcou {used} produtos no plano {plan}. Faça upgrade para marcar mais.",
+    "upgradePlan": "Fazer upgrade",
+    "savedTitle": "Salvo",
+    "savedText": "O destaque está ativo na sua loja.",
+    "pickVariant": "Escolha a variante para destacar",
+    "badgeStyle": "Estilo do destaque",
+    "badgeText": "Texto do destaque",
+    "badgeBgColor": "Cor de fundo do destaque",
+    "badgeTextColor": "Cor do texto do destaque",
+    "preview": "PRÉ-VISUALIZAÇÃO",
+    "variantPreviewLabel": "Variante",
+    "defaultBadgeText": "MELHOR ESCOLHA",
+    "customColor": "Escolher cor personalizada",
+    "removeMarking": "Remover marcação",
+    "save": "Salvar"
+  },
+  "billing": {
+    "title": "Planos",
+    "subtitle": "Escolha o plano ideal para sua loja",
+    "back": "Voltar",
+    "current": "Atual",
+    "currentPlan": "Plano atual",
+    "downgradeViaCancel": "Fazer downgrade cancelando",
+    "cancelSubscription": "Cancelar assinatura",
+    "choose": "Escolher {plan}",
+    "needMoreTitle": "Precisa de mais de 200 produtos regularmente?",
+    "needMoreText": "O plano Pro é ilimitado. Para necessidades enterprise, entre em contato em support@profitpicker.app",
+    "plans": {
+      "free": {
+        "name": "Grátis",
+        "price": "US$ 0",
+        "limit": "5 produtos",
+        "features": [
+          "Até 5 produtos marcados",
+          "Todas as personalizações do destaque",
+          "Funciona em qualquer tema OS 2.0"
+        ]
+      },
+      "starter": {
+        "name": "Starter",
+        "price": "US$ 1/mês",
+        "limit": "50 produtos",
+        "features": [
+          "Até 50 produtos marcados",
+          "Todas as personalizações do destaque",
+          "Suporte prioritário por e-mail"
+        ]
+      },
+      "growth": {
+        "name": "Growth",
+        "price": "US$ 5/mês",
+        "limit": "200 produtos",
+        "features": [
+          "Até 200 produtos marcados",
+          "Todas as personalizações do destaque",
+          "Suporte prioritário por e-mail"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "US$ 10/mês",
+        "limit": "Ilimitado",
+        "features": [
+          "Produtos ilimitados marcados",
+          "Todas as personalizações do destaque",
+          "Suporte prioritário por e-mail"
+        ]
+      }
+    }
+  }
+}
