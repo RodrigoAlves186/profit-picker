@@ -13,27 +13,13 @@ import {
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server";
 import { getI18n } from "../i18n.server";
-
-const PLAN_KEYS = ["free", "starter", "growth", "pro"];
-const BILLING_PLANS = { starter: "Starter", growth: "Growth", pro: "Pro" };
+import { BILLING_PLANS, PLAN_KEYS, getCurrentPlan } from "../plans.server";
 
 export const loader = async ({ request }) => {
-  const { billing } = await authenticate.admin(request);
+  const { admin, billing, session } = await authenticate.admin(request);
   const { t } = getI18n(request);
 
-  let currentPlan = "free";
-  try {
-    const check = await billing.check({
-      plans: ["Starter", "Growth", "Pro"],
-      isTest: true,
-    });
-    if (check.hasActivePayment) {
-      const name = check.appSubscriptions[0]?.name?.toLowerCase();
-      if (name && PLAN_KEYS.includes(name)) currentPlan = name;
-    }
-  } catch (e) {
-    currentPlan = "free";
-  }
+  const { currentPlan } = await getCurrentPlan({ admin, billing, session });
 
   const plans = PLAN_KEYS.map((key) => ({
     key,
@@ -63,20 +49,17 @@ export const loader = async ({ request }) => {
 };
 
 export const action = async ({ request }) => {
-  const { billing } = await authenticate.admin(request);
+  const { admin, billing, session } = await authenticate.admin(request);
   const formData = await request.formData();
   const planKey = formData.get("plan");
   const intent = formData.get("intent");
+  const { isTest, subscription } = await getCurrentPlan({ admin, billing, session });
 
   if (intent === "cancel") {
-    const check = await billing.check({
-      plans: ["Starter", "Growth", "Pro"],
-      isTest: true,
-    });
-    if (check.hasActivePayment) {
+    if (subscription) {
       await billing.cancel({
-        subscriptionId: check.appSubscriptions[0].id,
-        isTest: true,
+        subscriptionId: subscription.id,
+        isTest,
         prorate: true,
       });
     }
@@ -88,8 +71,8 @@ export const action = async ({ request }) => {
 
   await billing.require({
     plans: [billingName],
-    isTest: true,
-    onFailure: async () => billing.request({ plan: billingName, isTest: true }),
+    isTest,
+    onFailure: async () => billing.request({ plan: billingName, isTest }),
   });
 
   return { ok: true };

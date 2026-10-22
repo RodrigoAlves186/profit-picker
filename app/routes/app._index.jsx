@@ -17,70 +17,13 @@ import {
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server";
 import { getI18n } from "../i18n.server";
-
-const PLAN_LIMITS = {
-  free: { key: "free", limit: 5 },
-  starter: { key: "starter", limit: 50 },
-  growth: { key: "growth", limit: 200 },
-  pro: { key: "pro", limit: Infinity },
-};
-
-
-
-async function ensureMetafieldDefinitions(admin) {
-  const defs = [
-    { key: "variant_id", name: "Profit Picker - Variant ID" },
-    { key: "badge_text", name: "Profit Picker - Badge Text" },
-    { key: "badge_color", name: "Profit Picker - Badge Color" },
-    { key: "badge_text_color", name: "Profit Picker - Badge Text Color" },
-  ];
-  for (const d of defs) {
-    try {
-      await admin.graphql(`
-        #graphql
-        mutation CreateDef($definition: MetafieldDefinitionInput!) {
-          metafieldDefinitionCreate(definition: $definition) {
-            createdDefinition { id }
-            userErrors { field message code }
-          }
-        }
-      `, {
-        variables: {
-          definition: {
-            name: d.name,
-            namespace: "profit_picker",
-            key: d.key,
-            type: "single_line_text_field",
-            ownerType: "PRODUCT",
-            access: { storefront: "PUBLIC_READ" },
-          },
-        },
-      });
-    } catch (e) {
-      // ignore (already exists)
-    }
-  }
-}
+import { getCurrentPlan, getMarkedProductIds } from "../plans.server";
 
 export const loader = async ({ request }) => {
   const { admin, billing, session } = await authenticate.admin(request);
   const { t } = getI18n(request);
 
-  await ensureMetafieldDefinitions(admin);
-
-  let currentPlan = "free";
-  try {
-    const billingCheck = await billing.check({
-      plans: ["Starter", "Growth", "Pro"],
-      isTest: true,
-    });
-    if (billingCheck.hasActivePayment) {
-      const planName = billingCheck.appSubscriptions[0]?.name?.toLowerCase();
-      if (planName && PLAN_LIMITS[planName]) currentPlan = planName;
-    }
-  } catch (e) {
-    currentPlan = "free";
-  }
+  const { currentPlan, limit } = await getCurrentPlan({ admin, billing, session });
 
   const response = await admin.graphql(`
     #graphql
@@ -109,11 +52,9 @@ export const loader = async ({ request }) => {
     markedVariantId: e.node.markedVariant?.value || null,
   }));
 
-  const usedCount = products.filter((p) => p.markedVariantId).length;
-  const planInfo = PLAN_LIMITS[currentPlan];
-  const planName = t(`billing.plans.${planInfo.key}.name`);
+  const usedCount = (await getMarkedProductIds(admin)).length;
+  const planName = t(`billing.plans.${currentPlan}.name`);
 
-  const extensionHandle = "profit-picker-badge";
   const embedHandle = "app_embed";
   const apiKey = process.env.SHOPIFY_API_KEY;
   const activateUrl = `https://${session.shop}/admin/themes/current/editor?context=apps&template=product&activateAppId=${apiKey}/${embedHandle}&target=mainSection`;
@@ -123,16 +64,16 @@ export const loader = async ({ request }) => {
     currentPlan,
     usedCount,
     planName,
-    planLimit: planInfo.limit === Infinity ? null : planInfo.limit,
+    planLimit: limit === Infinity ? null : limit,
     activateUrl,
     i18n: {
       title: t("app.name"),
       subtitle: t("app.subtitle"),
       managePlan: t("index.managePlan"),
       currentPlan: t("index.currentPlan", { plan: planName }),
-      productsMarked: planInfo.limit === Infinity
+      productsMarked: limit === Infinity
         ? t("index.productsMarkedUnlimited", { used: usedCount })
-        : t("index.productsMarked", { used: usedCount, limit: planInfo.limit }),
+        : t("index.productsMarked", { used: usedCount, limit }),
       limitReached: t("index.limitReached"),
       available: t("index.available"),
       limitBannerTitle: t("index.limitBannerTitle"),

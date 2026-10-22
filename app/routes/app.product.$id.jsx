@@ -17,13 +17,9 @@ import {
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server";
 import { getI18n } from "../i18n.server";
+import { getCurrentPlan, getMarkedProductIds } from "../plans.server";
 
-const PLAN_LIMITS = {
-  free: 5,
-  starter: 50,
-  growth: 200,
-  pro: Infinity,
-};
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 
 const BG_PALETTE = [
   "#1a4d2e", "#c0392b", "#1e4e8c", "#1a1a1a",
@@ -82,23 +78,11 @@ function ColorPicker({ label, value, onChange, palette, customLabel }) {
 }
 
 export const loader = async ({ request, params }) => {
-  const { admin, billing } = await authenticate.admin(request);
+  const { admin, billing, session } = await authenticate.admin(request);
   const { t } = getI18n(request);
   const productGid = `gid://shopify/Product/${params.id}`;
 
-  let currentPlan = "free";
-  try {
-    const billingCheck = await billing.check({
-      plans: ["Starter", "Growth", "Pro"],
-      isTest: true,
-    });
-    if (billingCheck.hasActivePayment) {
-      const planName = billingCheck.appSubscriptions[0]?.name?.toLowerCase();
-      if (planName && PLAN_LIMITS[planName] !== undefined) currentPlan = planName;
-    }
-  } catch (e) {
-    currentPlan = "free";
-  }
+  const { currentPlan, limit } = await getCurrentPlan({ admin, billing, session });
 
   const response = await admin.graphql(`
     #graphql
@@ -115,23 +99,14 @@ export const loader = async ({ request, params }) => {
         badgeColor: metafield(namespace: "profit_picker", key: "badge_color") { value }
         badgeTextColor: metafield(namespace: "profit_picker", key: "badge_text_color") { value }
       }
-      productsConnection: products(first: 250) {
-        edges {
-          node {
-            id
-            markedVariant: metafield(namespace: "profit_picker", key: "variant_id") { value }
-          }
-        }
-      }
     }
   `, { variables: { id: productGid } });
 
   const data = await response.json();
   const product = data.data.product;
+  if (!product) throw new Response("Product not found", { status: 404 });
 
-  const usedCount = data.data.productsConnection.edges
-    .filter((e) => e.node.markedVariant?.value)
-    .length;
+  const usedCount = (await getMarkedProductIds(admin)).length;
 
   const isThisProductMarked = !!product.markedVariant?.value;
   const planLocalizedName = t(`billing.plans.${currentPlan}.name`);
@@ -155,7 +130,7 @@ export const loader = async ({ request, params }) => {
       badgeColor: product.badgeColor?.value || "#1a4d2e",
       badgeTextColor: product.badgeTextColor?.value || "#ffffff",
     },
-    currentPlan,
+    planLimit: limit === Infinity ? null : limit,
     usedCount,
     isThisProductMarked,
     i18n: {
@@ -181,18 +156,27 @@ export const loader = async ({ request, params }) => {
 };
 
 export const action = async ({ request, params }) => {
-  const { admin } = await authenticate.admin(request);
+  const { admin, billing, session } = await authenticate.admin(request);
+  const { t } = getI18n(request);
   const formData = await request.formData();
   const intent = formData.get("intent");
   const productGid = `gid://shopify/Product/${params.id}`;
 
   if (intent === "save") {
-    const variantId = formData.get("variantId");
-    const badgeText = (formData.get("badgeText") || "").slice(0, 20);
-    const badgeColor = formData.get("badgeColor");
-    const badgeTextColor = formData.get("badgeTextColor");
+    // The button is disabled at the limit, but the server has the final word.
+    const { limit } = await getCurrentPlan({ admin, billing, session });
+    const markedIds = await getMarkedProductIds(admin);
+    if (!markedIds.includes(productGid) && markedIds.length >= limit) {
+      return { ok: false, error: "limit" };
+    }
 
-    await admin.graphql(`
+    const variantId = String(formData.get("variantId") || "").replace(/\D/g, "");
+    if (!variantId) return { ok: false, error: "variant" };
+    const badgeText = String(formData.get("badgeText") || "").trim().slice(0, 20) || t("product.defaultBadgeText");
+    const badgeColor = HEX_COLOR.test(formData.get("badgeColor")) ? formData.get("badgeColor") : "#1a4d2e";
+    const badgeTextColor = HEX_COLOR.test(formData.get("badgeTextColor")) ? formData.get("badgeTextColor") : "#ffffff";
+
+    const saveResponse = await admin.graphql(`
       #graphql
       mutation SetMetafields($metafields: [MetafieldsSetInput!]!) {
         metafieldsSet(metafields: $metafields) {
@@ -202,14 +186,16 @@ export const action = async ({ request, params }) => {
     `, {
       variables: {
         metafields: [
-          { ownerId: productGid, namespace: "profit_picker", key: "variant_id", type: "single_line_text_field", value: String(variantId) },
-          { ownerId: productGid, namespace: "profit_picker", key: "badge_text", type: "single_line_text_field", value: badgeText || "MELHOR ESCOLHA" },
-          { ownerId: productGid, namespace: "profit_picker", key: "badge_color", type: "single_line_text_field", value: badgeColor || "#1a4d2e" },
-          { ownerId: productGid, namespace: "profit_picker", key: "badge_text_color", type: "single_line_text_field", value: badgeTextColor || "#ffffff" },
+          { ownerId: productGid, namespace: "profit_picker", key: "variant_id", type: "single_line_text_field", value: variantId },
+          { ownerId: productGid, namespace: "profit_picker", key: "badge_text", type: "single_line_text_field", value: badgeText },
+          { ownerId: productGid, namespace: "profit_picker", key: "badge_color", type: "single_line_text_field", value: badgeColor },
+          { ownerId: productGid, namespace: "profit_picker", key: "badge_text_color", type: "single_line_text_field", value: badgeTextColor },
         ],
       },
     });
 
+    const saveData = await saveResponse.json();
+    if (saveData.data?.metafieldsSet?.userErrors?.length) return { ok: false, error: "save" };
     return { ok: true };
   }
 
@@ -236,7 +222,7 @@ export const action = async ({ request, params }) => {
 };
 
 export default function ProductDetail() {
-  const { product, currentPlan, usedCount, isThisProductMarked, i18n } = useLoaderData();
+  const { product, planLimit, usedCount, isThisProductMarked, i18n } = useLoaderData();
   const fetcher = useFetcher();
   const navigate = useNavigate();
 
@@ -247,8 +233,7 @@ export default function ProductDetail() {
   const [badgeColor, setBadgeColor] = useState(product.badgeColor);
   const [badgeTextColor, setBadgeTextColor] = useState(product.badgeTextColor);
 
-  const planLimit = PLAN_LIMITS[currentPlan];
-  const wouldExceedLimit = !isThisProductMarked && usedCount >= planLimit;
+  const wouldExceedLimit = !isThisProductMarked && planLimit !== null && usedCount >= planLimit;
 
   const choices = product.variants.map((v) => ({
     label: `${v.title} — $${v.price}`,
@@ -280,7 +265,7 @@ export default function ProductDetail() {
       backAction={{ content: i18n.back, onAction: () => navigate("/app") }}
     >
       <Layout>
-        {wouldExceedLimit && (
+        {(wouldExceedLimit || fetcher.data?.error === "limit") && (
           <Layout.Section>
             <Banner tone="warning" title={i18n.planLimitTitle}>
               <Text as="p">{i18n.planLimitText}</Text>

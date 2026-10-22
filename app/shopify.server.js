@@ -7,6 +7,7 @@ import {
 } from "@shopify/shopify-app-react-router/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
+import { ensureMetafieldDefinitions } from "./metafields.server";
 
 export const STARTER_PLAN = "Starter";
 export const GROWTH_PLAN = "Growth";
@@ -39,6 +40,11 @@ const shopify = shopifyApp({
       currencyCode: "USD",
       interval: BillingInterval.Every30Days,
       trialDays: 0,
+    },
+  },
+  hooks: {
+    afterAuth: async ({ admin }) => {
+      await ensureMetafieldDefinitions(admin);
     },
   },
   future: {

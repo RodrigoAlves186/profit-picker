@@ -10,7 +10,8 @@
     {%- if pp_variant -%}
       {%- assign pp_bg = product.metafields.profit_picker.badge_color | default: "#1a4d2e" -%}
       {%- assign pp_fg = product.metafields.profit_picker.badge_text_color | default: "#ffffff" -%}
-      {%- assign pp_text = product.metafields.profit_picker.badge_text | default: "MELHOR ESCOLHA" -%}
+      {%- assign pp_default_text = 'profit_picker.default_badge_text' | t -%}
+      {%- assign pp_text = product.metafields.profit_picker.badge_text | default: pp_default_text -%}
       <style>
         .pp-mark{position:relative !important;overflow:visible !important;box-shadow:0 0 0 2px {{ pp_bg }} !important;z-index:2 !important}
         .pp-mark .variant-option__button-label__pill{display:none !important}
