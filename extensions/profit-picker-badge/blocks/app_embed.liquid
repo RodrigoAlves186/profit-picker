@@ -47,8 +47,12 @@
             document.querySelectorAll('.pp-badge').forEach(function(e){e.remove();});
             document.querySelectorAll('.pp-mark').forEach(function(e){e.classList.remove('pp-mark');});
             document.querySelectorAll('.pp-host').forEach(function(e){e.classList.remove('pp-host');});
-            var hit = document.querySelectorAll('[data-variant-id="'+VID+'"]');
-            if(hit.length){ hit.forEach(function(el){ mark(el.closest('label')||el.closest('[class*="swatch"]')||el); }); return; }
+            // Only clickable variant choices: themes like Dawn also put data-variant-id
+            // on non-picker blocks (pickup availability), which must not get the badge.
+            var hit = Array.prototype.filter.call(document.querySelectorAll('[data-variant-id="'+VID+'"]'), function(el){
+              return el.matches('input,button,label,li,[role="radio"],[role="option"]');
+            });
+            if(hit.length){ hit.forEach(function(el){ mark(el.tagName==='INPUT' ? labelFor(el) : (el.closest('label')||el)); }); return; }
             OPTS.forEach(function(o){
               document.querySelectorAll('input[type="radio"]').forEach(function(inp){
                 if((inp.name||'').toLowerCase().indexOf(String(o.name).toLowerCase())!==-1 && inp.value===String(o.value)) mark(labelFor(inp));
