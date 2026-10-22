@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLoaderData, useNavigate, useFetcher } from "react-router";
 import {
   Page,
@@ -69,11 +70,21 @@ export const action = async ({ request }) => {
   const billingName = BILLING_PLANS[planKey];
   if (!billingName) return { ok: false };
 
-  await billing.require({
-    plans: [billingName],
-    isTest,
-    onFailure: async () => billing.request({ plan: billingName, isTest }),
-  });
+  try {
+    await billing.require({
+      plans: [billingName],
+      isTest,
+      onFailure: async () => billing.request({ plan: billingName, isTest }),
+    });
+  } catch (error) {
+    // billing.request answers a fetcher with the approval URL in a header that
+    // React Router's data requests drop, so hand the URL to the page instead.
+    const confirmationUrl = error instanceof Response
+      ? error.headers.get("X-Shopify-API-Request-Failure-Reauthorize-Url")
+      : null;
+    if (confirmationUrl) return { ok: true, confirmationUrl };
+    throw error;
+  }
 
   return { ok: true };
 };
@@ -83,6 +94,12 @@ export default function Billing() {
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const isLoading = fetcher.state !== "idle";
+
+  // The charge approval page lives in the Shopify admin, outside the app iframe.
+  const confirmationUrl = fetcher.data?.confirmationUrl;
+  useEffect(() => {
+    if (confirmationUrl) open(confirmationUrl, "_top");
+  }, [confirmationUrl]);
 
   const handleSelect = (planKey) => {
     const fd = new FormData();
