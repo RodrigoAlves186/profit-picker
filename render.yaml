@@ -1,0 +1,18 @@
+# Render Blueprint: creates the production web service.
+# Secrets are marked sync: false, so Render asks for them on the first deploy.
+services:
+  - type: web
+    name: profit-picker
+    runtime: docker
+    plan: free
+    region: ohio
+    branch: main
+    envVars:
+      - key: SHOPIFY_API_KEY
+        value: 677a23e30c28a32610d8b7702165406b
+      - key: SCOPES
+        value: write_products
+      - key: SHOPIFY_API_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
