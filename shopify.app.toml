@@ -2,7 +2,7 @@
 
 client_id = "677a23e30c28a32610d8b7702165406b"
 name = "profit-picker"
-application_url = "https://example.com"
+application_url = "https://profit-picker.onrender.com"
 embedded = true
 
 [build]
@@ -29,4 +29,4 @@ api_version = "2027-01"
 scopes = "write_products"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [ "https://profit-picker.onrender.com/auth/callback", "https://profit-picker.onrender.com/auth/shopify/callback", "https://profit-picker.onrender.com/api/auth/callback" ]
