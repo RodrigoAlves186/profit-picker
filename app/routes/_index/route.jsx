@@ -18,9 +18,10 @@ export default function App() {
   return (
     <div className={styles.index}>
       <div className={styles.content}>
-        <h1 className={styles.heading}>A short heading about [your app]</h1>
+        <h1 className={styles.heading}>Profit Picker</h1>
         <p className={styles.text}>
-          A tagline about [your app] that describes your value proposition.
+          Highlight the product variant you want customers to choose, with a
+          badge right on the variant picker.
         </p>
         {showForm && (
           <Form className={styles.form} method="post" action="/auth/login">
@@ -36,18 +37,21 @@ export default function App() {
         )}
         <ul className={styles.list}>
           <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
+            <strong>Pick the variant</strong>. Choose which variant of each
+            product gets the highlight, right from the Shopify admin.
           </li>
           <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
+            <strong>Customize the badge</strong>. Set the badge text and colors to
+            match your store.
           </li>
           <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
+            <strong>Works with your theme</strong>. Turn it on as an app embed in
+            the theme editor, with no code changes.
           </li>
         </ul>
+        <p className={styles.text}>
+          <a href="/privacy">Privacy policy</a>
+        </p>
       </div>
     </div>
   );
