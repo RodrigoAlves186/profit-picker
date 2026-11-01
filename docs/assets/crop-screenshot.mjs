@@ -1,11 +1,14 @@
 // Crops a PNG screenshot and scales it to 1600x900 for the App Store listing.
-// Usage: node docs/assets/crop-screenshot.mjs <in.png> <out.png> <x> <y> <width> <height>
+// Usage: node docs/assets/crop-screenshot.mjs <in.png> <out.png> <x> <y> <width> <height> [maskX,maskY,maskW,maskH ...]
+// Each optional mask (in source pixels) is painted white first, e.g. to hide prices,
+// which App Store images must not show.
 // No dependencies: decodes and encodes PNG with node:zlib.
 import { readFileSync, writeFileSync } from "node:fs";
 import { inflateSync, deflateSync } from "node:zlib";
 
-const [, , input, output, ...box] = process.argv;
-const [cx, cy, cw, ch] = box.map(Number);
+const [, , input, output, ...rest] = process.argv;
+const [cx, cy, cw, ch] = rest.slice(0, 4).map(Number);
+const masks = rest.slice(4).map((m) => m.split(",").map(Number));
 const OUT_W = 1600;
 const OUT_H = 900;
 
@@ -93,6 +96,14 @@ function encodePng(width, height, rgb) {
 }
 
 const img = decodePng(readFileSync(input));
+for (const [mx, my, mw, mh] of masks) {
+  for (let y = my; y < my + mh; y++) {
+    for (let x = mx; x < mx + mw; x++) {
+      const i = (y * img.width + x) * img.bpp;
+      img.px[i] = img.px[i + 1] = img.px[i + 2] = 255;
+    }
+  }
+}
 const out = Buffer.alloc(OUT_W * OUT_H * 3);
 // Box filter: average every source pixel that falls under each output pixel.
 const sx = cw / OUT_W;
