@@ -1,7 +1,7 @@
-import { redirect, Form, useLoaderData } from "react-router";
-import { login } from "../../shopify.server";
+import { redirect } from "react-router";
 import styles from "./styles.module.css";
 
+// App Store apps must not ask for the shop domain, so this page has no login form.
 export const loader = async ({ request }) => {
   const url = new URL(request.url);
 
@@ -9,12 +9,10 @@ export const loader = async ({ request }) => {
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
 
-  return { showForm: Boolean(login) };
+  return null;
 };
 
 export default function App() {
-  const { showForm } = useLoaderData();
-
   return (
     <div className={styles.index}>
       <div className={styles.content}>
@@ -23,18 +21,9 @@ export default function App() {
           Highlight the product variant you want customers to choose, with a
           badge right on the variant picker.
         </p>
-        {showForm && (
-          <Form className={styles.form} method="post" action="/auth/login">
-            <label className={styles.label}>
-              <span>Shop domain</span>
-              <input className={styles.input} type="text" name="shop" />
-              <span>e.g: my-shop-domain.myshopify.com</span>
-            </label>
-            <button className={styles.button} type="submit">
-              Log in
-            </button>
-          </Form>
-        )}
+        <p className={styles.text}>
+          Install Profit Picker from the Shopify App Store.
+        </p>
         <ul className={styles.list}>
           <li>
             <strong>Pick the variant</strong>. Choose which variant of each
