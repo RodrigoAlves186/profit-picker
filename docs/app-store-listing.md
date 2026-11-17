@@ -44,11 +44,14 @@ Profit Picker lets you choose, for each product, the variant you want customers 
 variant badge · product badge · variant highlight · best seller badge · upsell
 
 **Demo / test instructions for the reviewer:**
+
+IMPORTANT: Profit Picker highlights one variant among several, so it only works on products with 2 or more variants (for example sizes or colors). Products with a single variant are not listed in the app and show no badge on the storefront. If the test store has no product with variants, please add one (for example a product with a "Size" option: S, M, L) before testing.
+
 1. Install the app and open it from Apps > Profit Picker.
-2. Click "Activate in theme" and save the theme editor to turn on the Profit Picker app embed.
-3. Open any product with variants, choose a variant, set the badge text and colors, and click Save.
-4. Visit that product page on the storefront: the badge appears under the chosen variant.
-5. Plans: open "Plans" and pick a paid plan to see the Shopify charge approval (test charge on development stores).
+2. Click "Activate in theme". The theme editor opens with the Profit Picker app embed turned on. Click Save in the theme editor.
+3. In the app, the list shows only products with variants. Open one, choose the variant to highlight (for example "M"), set the badge text and colors, and click Save.
+4. Open that same product page on the storefront. The badge appears right under the chosen variant in the variant picker. Tested with the Horizon and Dawn themes.
+5. Plans: open "Plans" and choose a paid plan to see the Shopify charge approval (test charge on development stores). The Free plan allows 5 highlighted products.
 
 ---
 
