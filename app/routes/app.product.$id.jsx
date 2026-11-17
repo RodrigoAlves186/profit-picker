@@ -151,6 +151,8 @@ export const loader = async ({ request, params }) => {
       customColor: t("product.customColor"),
       removeMarking: t("product.removeMarking"),
       save: t("product.save"),
+      singleVariantTitle: t("product.singleVariantTitle"),
+      singleVariantText: t("product.singleVariantText"),
     },
   };
 };
@@ -172,6 +174,16 @@ export const action = async ({ request, params }) => {
 
     const variantId = String(formData.get("variantId") || "").replace(/\D/g, "");
     if (!variantId) return { ok: false, error: "variant" };
+    const countResponse = await admin.graphql(`
+      #graphql
+      query ProductVariantCount($id: ID!) {
+        product(id: $id) { variantsCount { count } }
+      }
+    `, { variables: { id: productGid } });
+    const countData = await countResponse.json();
+    if ((countData.data?.product?.variantsCount?.count ?? 0) < 2) {
+      return { ok: false, error: "single_variant" };
+    }
     const badgeText = String(formData.get("badgeText") || "").trim().slice(0, 20) || t("product.defaultBadgeText");
     const badgeColor = HEX_COLOR.test(formData.get("badgeColor")) ? formData.get("badgeColor") : "#1a4d2e";
     const badgeTextColor = HEX_COLOR.test(formData.get("badgeTextColor")) ? formData.get("badgeTextColor") : "#ffffff";
@@ -258,6 +270,23 @@ export default function ProductDetail() {
 
   const isSaving = fetcher.state !== "idle";
   const justSaved = fetcher.data?.ok;
+
+  if (product.variants.length < 2) {
+    return (
+      <Page
+        title={product.title}
+        backAction={{ content: i18n.back, onAction: () => navigate("/app") }}
+      >
+        <Layout>
+          <Layout.Section>
+            <Banner tone="info" title={i18n.singleVariantTitle}>
+              <Text as="p">{i18n.singleVariantText}</Text>
+            </Banner>
+          </Layout.Section>
+        </Layout>
+      </Page>
+    );
+  }
 
   return (
     <Page

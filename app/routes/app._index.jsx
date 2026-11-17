@@ -28,7 +28,7 @@ export const loader = async ({ request }) => {
   const response = await admin.graphql(`
     #graphql
     query ProductsWithMarked {
-      products(first: 50, sortKey: UPDATED_AT, reverse: true) {
+      products(first: 100, sortKey: UPDATED_AT, reverse: true) {
         edges {
           node {
             id
@@ -42,7 +42,8 @@ export const loader = async ({ request }) => {
     }
   `);
   const data = await response.json();
-  const products = data.data.products.edges.map((e) => ({
+  // Highlighting needs a choice between variants, so single-variant products are left out.
+  const products = data.data.products.edges.filter((e) => e.node.totalVariants > 1).map((e) => ({
     id: e.node.id,
     numericId: e.node.id.replace("gid://shopify/Product/", ""),
     title: e.node.title,

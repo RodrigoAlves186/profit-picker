@@ -17,8 +17,8 @@
     "limitBannerTitle": "You've reached your plan limit",
     "limitBannerText": "Upgrade to mark more products.",
     "upgradeNow": "Upgrade now",
-    "noProductsHeading": "No products in this store yet",
-    "noProductsText": "Add products to your store to start marking variants.",
+    "noProductsHeading": "No products with variants yet",
+    "noProductsText": "Profit Picker works on products with two or more variants, such as sizes or colors. Add variants to a product to start.",
     "variantSingular": "variant",
     "variantPlural": "variants",
     "marked": "Marked",
@@ -44,7 +44,9 @@
     "defaultBadgeText": "BEST CHOICE",
     "customColor": "Pick a custom color",
     "removeMarking": "Remove marking",
-    "save": "Save"
+    "save": "Save",
+    "singleVariantTitle": "This product has only one variant",
+    "singleVariantText": "Profit Picker highlights one variant among several, so it works on products with two or more variants, such as sizes or colors."
   },
   "billing": {
     "title": "Plans",

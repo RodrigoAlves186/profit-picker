@@ -17,8 +17,8 @@
     "limitBannerTitle": "Você atingiu o limite do seu plano",
     "limitBannerText": "Faça upgrade para marcar mais produtos.",
     "upgradeNow": "Fazer upgrade",
-    "noProductsHeading": "Ainda não há produtos nesta loja",
-    "noProductsText": "Adicione produtos à sua loja para começar a marcar variantes.",
+    "noProductsHeading": "Ainda não há produtos com variantes",
+    "noProductsText": "O Profit Picker funciona em produtos com duas ou mais variantes, como tamanhos ou cores. Adicione variantes a um produto para começar.",
     "variantSingular": "variante",
     "variantPlural": "variantes",
     "marked": "Marcado",
@@ -44,7 +44,9 @@
     "defaultBadgeText": "MELHOR ESCOLHA",
     "customColor": "Escolher cor personalizada",
     "removeMarking": "Remover marcação",
-    "save": "Salvar"
+    "save": "Salvar",
+    "singleVariantTitle": "Este produto tem só uma variante",
+    "singleVariantText": "O Profit Picker destaca uma variante entre várias, então funciona em produtos com duas ou mais variantes, como tamanhos ou cores."
   },
   "billing": {
     "title": "Planos",
