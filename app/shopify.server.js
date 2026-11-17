@@ -8,6 +8,7 @@ import {
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
 import { ensureMetafieldDefinitions } from "./metafields.server";
+import "./keep-awake.server";
 
 export const STARTER_PLAN = "Starter";
 export const GROWTH_PLAN = "Growth";
